@@ -11,13 +11,11 @@ router.post("/sign-up", userMiddleware.validateSignup, (req, res, next) => {
       req.body.useremail
     )});`,
     (err, result) => {
-      //   console.log(result)
       if (result.length) {
         return res.send({
           msg: "User already exists",
         })
       } else {
-        // username is available
         bcrypt.hash(req.body.password, 10, (err, hash) => {
           db.query(
             `INSERT INTO nodeauthentication (id, useremail, password, registered) VALUES ('${uuid.v4()}', ${db.escape(
@@ -40,7 +38,47 @@ router.post("/sign-up", userMiddleware.validateSignup, (req, res, next) => {
     }
   )
 })
-router.post("/login", (req, res, next) => {})
+router.post("/login", (req, res, next) => {
+  db.query(
+    `SELECT * FROM nodeauthentication WHERE useremail = ${db.escape(
+      req.body.useremail
+    )};`,
+    (err, result) => {
+      if (err) {
+        throw err
+        return res.send({
+          msg: err,
+        })
+      }
+      if (!result.length) {
+        return res.send({
+          msg: "Useremail or password is incorrect",
+        })
+      }
+      bcrypt.compare(
+        req.body.password,
+        result[0]["password"],
+        (Err, Result) => {
+          if (Err) {
+            throw Err
+            return res.send({
+              msg: "Useremail or password is incorrect",
+            })
+          }
+          if (Result) {
+            return res.send({
+              msg: "Logged in successfully",
+              user: result[0],
+            })
+          }
+          return res.send({
+            msg: "Useremail or password is incorrect",
+          })
+        }
+      )
+    }
+  )
+})
 router.get("/dashboard", (req, res, next) => {
   res.send("dashboard view")
 })
