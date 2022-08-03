@@ -52,7 +52,7 @@ router.post("/login", (req, res, next) => {
       }
       if (!result.length) {
         return res.send({
-          msg: "Useremail or password is incorrect",
+          msg: "Email or password is incorrect",
         })
       }
       bcrypt.compare(
@@ -62,24 +62,32 @@ router.post("/login", (req, res, next) => {
           if (Err) {
             throw Err
             return res.send({
-              msg: "Useremail or password is incorrect",
+              msg: "Email or password is incorrect",
             })
           }
           if (Result) {
             return res.send({
               msg: "Logged in successfully",
+              token: jwt.sign(
+                {
+                  useremail: result[0].useremail,
+                  userId: result[0].id,
+                },
+                "SECRETKEY",
+                {
+                  expiresIn: "10h",
+                }
+              ),
               user: result[0],
             })
           }
           return res.send({
-            msg: "Useremail or password is incorrect",
+            msg: "Email or password is incorrect",
           })
         }
       )
     }
   )
 })
-router.get("/dashboard", (req, res, next) => {
-  res.send("dashboard view")
-})
+
 module.exports = router
