@@ -89,5 +89,13 @@ router.post("/login", (req, res, next) => {
     }
   )
 })
-
+router.get("/allusers", (req, res, next) => {
+  db.query(
+    "SELECT * FROM nodeauthentication Where role != 'admin'",
+    function (err, result, fields) {
+      if (err) throw err
+      return res.send(result)
+    }
+  )
+})
 module.exports = router
